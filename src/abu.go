@@ -26,7 +26,6 @@ func gitBranch() {
 	output, err := exec.Command("git", "branch").CombinedOutput()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v", err)
-		os.Exit(1)
 	}
 	fmt.Printf("%s", output)
 }
