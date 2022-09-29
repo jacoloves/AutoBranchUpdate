@@ -22,6 +22,7 @@ func main() {
 
 	gitBranch()
 	gitPullBranch(nil, TRAGET_REPO)
+	gitPushBrunch(nil, TRAGET_REPO)
 }
 
 func gitBranch() {
@@ -48,6 +49,27 @@ func gitPullBranch(in io.Reader, repoName string) {
 		}
 		fmt.Printf("%s", output)
 	default:
-		fmt.Printf("do not git pull %s\n", TRAGET_REPO)
+		fmt.Printf("do not git pull %s\n", repoName)
+	}
+}
+
+func gitPushBrunch(in io.Reader, repoName string) {
+	if in == nil {
+		in = os.Stdin
+	}
+	fmt.Printf("git push %s? >", repoName)
+
+	refsRepo := fmt.Sprintf("refs/heads/%s:refs/heads/%s", repoName, repoName)
+	var inputValue string
+	fmt.Fscan(in, &inputValue)
+	switch inputValue {
+	case "y", "Y", "yes", "YES":
+		output, err := exec.Command("git", "push", "--recurse-submodules=check", "origin", refsRepo).CombinedOutput()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+		}
+		fmt.Printf("%s", output)
+	default:
+		fmt.Printf("do not git push %s\n", repoName)
 	}
 }
