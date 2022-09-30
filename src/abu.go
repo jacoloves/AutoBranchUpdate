@@ -10,7 +10,7 @@ import (
 
 const (
 	TRAGET_REPO = "feature"
-	MATER_REPO  = "master"
+	MASTER_REPO = "master"
 )
 
 func main() {
@@ -23,6 +23,8 @@ func main() {
 	gitBranch()
 	gitPullBranch(nil, TRAGET_REPO)
 	gitPushBrunch(nil, TRAGET_REPO)
+	gitCheckOutBrunch(nil, MASTER_REPO)
+	gitBranch()
 }
 
 func gitBranch() {
@@ -71,5 +73,26 @@ func gitPushBrunch(in io.Reader, repoName string) {
 		fmt.Printf("%s", output)
 	default:
 		fmt.Printf("do not git push %s\n", repoName)
+	}
+}
+
+func gitCheckOutBrunch(in io.Reader, repoName string) {
+	if in == nil {
+		in = os.Stdin
+	}
+	fmt.Printf("git checkout %s? >", repoName)
+
+	var inputValue string
+	fmt.Fscan(in, &inputValue)
+	switch inputValue {
+	case "y", "Y", "yes", "YES":
+		// git checkout
+		output, err := exec.Command("git", "checkout", repoName).CombinedOutput()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+		}
+		fmt.Printf("%s", output)
+	default:
+		fmt.Printf("do not git checkout %s\n", repoName)
 	}
 }
