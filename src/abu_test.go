@@ -133,3 +133,45 @@ func Test_gitPushBranch(t *testing.T) {
 		gitPushBrunch(in, "feature")
 	}
 }
+
+func Test_gitCheckOutBrunch(T *testing.T) {
+	prev, err := filepath.Abs(".")
+	if err != nil {
+		os.Exit(1)
+	}
+	defer os.Chdir(prev)
+
+	for _, dir := range testdirs {
+		target, err := filepath.Abs(dir)
+		if err != nil {
+			os.Exit(1)
+		}
+
+		os.Chdir(target)
+
+		in := bytes.NewBufferString("y")
+		gitCheckOutBrunch(in, "feature")
+	}
+
+	for _, dir := range testdirs {
+		target, err := filepath.Abs(dir)
+		if err != nil {
+			os.Exit(1)
+		}
+
+		os.Chdir(target)
+
+		in := bytes.NewBufferString("n")
+		gitCheckOutBrunch(in, "feature")
+	}
+
+	fmt.Println("--- input nil test ---")
+	gitCheckOutBrunch(nil, "feature")
+
+	fmt.Println("--- nil yes strings test ---")
+	os.Chdir(prev)
+	for _, input := range yesstrings {
+		in := bytes.NewBufferString(input)
+		gitCheckOutBrunch(in, "feature")
+	}
+}
