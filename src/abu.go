@@ -25,6 +25,8 @@ func main() {
 	gitPushBrunch(nil, TRAGET_REPO)
 	gitCheckOutBrunch(nil, MASTER_REPO)
 	gitBranch()
+	gitPullReleaseToTarget(nil, TRAGET_REPO, MASTER_REPO)
+	gitPushBrunch(nil, TRAGET_REPO)
 }
 
 func gitBranch() {
@@ -95,4 +97,26 @@ func gitCheckOutBrunch(in io.Reader, repoName string) {
 	default:
 		fmt.Printf("do not git checkout %s\n", repoName)
 	}
+}
+
+func gitPullReleaseToTarget(in io.Reader, repoName string, masterRepoName string) {
+	if in == nil {
+		in = os.Stdin
+	}
+	fmt.Printf("git pull %s to %s? >", masterRepoName, repoName)
+
+	refsMasterRepo := fmt.Sprintf("refs/heads/%s", masterRepoName)
+	var inputValue string
+	fmt.Fscan(in, &inputValue)
+	switch inputValue {
+	case "y", "Y", "yes", "YES":
+		output, err := exec.Command("git", "pull", "--progress", "origin", refsMasterRepo).CombinedOutput()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+		}
+		fmt.Printf("%s", output)
+	default:
+		fmt.Printf("do not git pull %s\n", masterRepoName)
+	}
+
 }
