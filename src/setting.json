@@ -1,0 +1,13 @@
+{
+    "Branch1": {
+        "mainRepository": "/home/stanaka/released/AutoBranchUpdate/src",
+        "logRepository": "/home/stanaka/released/AutoBranchUpdate/src",
+        "masterBranch": "master",
+        "logName": "",
+        "targetRepository": [
+            "feature",
+            "feature2"
+        ]
+
+    }
+}
