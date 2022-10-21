@@ -14,6 +14,19 @@ const (
 	DATE_LAYOUT = "20060102"
 )
 
+type SettingData struct {
+	Id               int      `json:"id"`
+	MainRepository   string   `json:"mainRepository"`
+	LogRepository    string   `json:"logRepository"`
+	MasterBranch     string   `json:"masterBranch"`
+	LogName          string   `json:"logName"`
+	TargetRepository []string `json:"targetRepository"`
+}
+
+type Setting struct {
+	SettingArray []SettingData `json:"settingArray"`
+}
+
 func main() {
 	prev, err := filepath.Abs(".")
 	if err != nil {
