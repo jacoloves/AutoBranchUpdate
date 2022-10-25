@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -12,6 +13,7 @@ const (
 	TRAGET_REPO = "feature"
 	MASTER_REPO = "master"
 	DATE_LAYOUT = "20060102"
+	CONFIG_FILE = "./setting.json"
 )
 
 type SettingData struct {
@@ -28,11 +30,15 @@ type Setting struct {
 }
 
 func main() {
+	// current direcotry get
 	prev, err := filepath.Abs(".")
 	if err != nil {
 		os.Exit(1)
 	}
 	defer os.Chdir(prev)
+
+	// Json file data get
+	configArray := getConfigData(CONFIG_FILE)
 
 	fp := createFilePointer()
 	defer fp.Close()
@@ -44,6 +50,15 @@ func main() {
 	gitBranch(fp)
 	gitPullReleaseToTarget(TRAGET_REPO, MASTER_REPO, fp)
 	gitPushBrunch(TRAGET_REPO, fp)
+}
+
+func getConfigData(configFileName string) {
+	raw, err := ioutil.ReadFile(configFileName)
+	if err != nil {
+		fmt.Println("--- config file load process failed ---")
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
 
 func createFilePointer() (fp *os.File) {
