@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -40,25 +41,53 @@ func main() {
 	// Json file data get
 	configArray := getConfigData(CONFIG_FILE)
 
-	fp := createFilePointer()
-	defer fp.Close()
+	for _, data := range configArray.SettingArray {
+		processErrFlg := createLogDir(data.logRepository)
+		if processErrFlg {
+			fmt.Println("createLogDir func failed")
+			continue
+		}
 
-	gitBranch(fp)
-	gitPullBranch(TRAGET_REPO, fp)
-	gitPushBrunch(TRAGET_REPO, fp)
-	gitCheckOutBrunch(MASTER_REPO, fp)
-	gitBranch(fp)
-	gitPullReleaseToTarget(TRAGET_REPO, MASTER_REPO, fp)
-	gitPushBrunch(TRAGET_REPO, fp)
+		fp := createFilePointer()
+		defer fp.Close()
+
+		gitBranch(fp)
+		gitPullBranch(TRAGET_REPO, fp)
+		gitPushBrunch(TRAGET_REPO, fp)
+		gitCheckOutBrunch(MASTER_REPO, fp)
+		gitBranch(fp)
+		gitPullReleaseToTarget(TRAGET_REPO, MASTER_REPO, fp)
+		gitPushBrunch(TRAGET_REPO, fp)
+	}
 }
 
-func getConfigData(configFileName string) {
+func createLogDir(createLogDir string) bool {
+	day := time.Now()
+	today_date := day.Format(DATE_LAYOUT)
+
+	os.Chdir(createLogDir)
+	if err := os.Mkdir(today_date, 0777); err != nil {
+		fmt.Println(err)
+		return true
+	}
+
+	return false
+}
+
+func getConfigData(configFileName string) Setting {
 	raw, err := ioutil.ReadFile(configFileName)
 	if err != nil {
-		fmt.Println("--- config file load process failed ---")
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
+	var settingDatas Setting
+	if err = json.Unmarshal(raw, &settingDatas); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	return settingDatas
 }
 
 func createFilePointer() (fp *os.File) {
