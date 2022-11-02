@@ -42,7 +42,7 @@ func main() {
 	configArray := getConfigData(CONFIG_FILE)
 
 	for _, data := range configArray.SettingArray {
-		processErrFlg := createLogDir(data.logRepository)
+		processErrFlg := createLogDir(data.LogRepository)
 		if processErrFlg {
 			fmt.Println("createLogDir func failed")
 			continue
