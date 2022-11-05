@@ -1,13 +1,15 @@
 {
-    "Branch1": {
-        "mainRepository": "/home/stanaka/released/AutoBranchUpdate/src",
-        "logRepository": "/home/stanaka/released/AutoBranchUpdate/src",
-        "masterBranch": "master",
-        "logName": "",
-        "targetRepository": [
-            "feature",
-            "feature2"
-        ]
-
-    }
+    "settingArray":[
+        {
+            "id": 1,
+            "mainRepository": "/home/stanaka/release/AutoBranchUpdate/src",
+            "logRepository": "/home/stanaka/tmp/release/AutoBranchUpdate/src/logs",
+            "masterBranch": "master",
+            "repositoryName": "AutoBranchUpdate",
+            "targetBranches": [
+                "feature",
+                "feature2"
+            ]
+        }
+    ] 
 }

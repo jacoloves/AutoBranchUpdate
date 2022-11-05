@@ -18,12 +18,12 @@ const (
 )
 
 type SettingData struct {
-	Id               int      `json:"id"`
-	MainRepository   string   `json:"mainRepository"`
-	LogRepository    string   `json:"logRepository"`
-	MasterBranch     string   `json:"masterBranch"`
-	LogName          string   `json:"logName"`
-	TargetRepository []string `json:"targetRepository"`
+	Id             int      `json:"id"`
+	MainRepository string   `json:"mainRepository"`
+	LogRepository  string   `json:"logRepository"`
+	MasterBranch   string   `json:"masterBranch"`
+	RepositoryName string   `json:"repositoryName"`
+	TargetBranches []string `json:"targetBranches"`
 }
 
 type Setting struct {
@@ -42,22 +42,28 @@ func main() {
 	configArray := getConfigData(CONFIG_FILE)
 
 	for _, data := range configArray.SettingArray {
+		fmt.Printf("======= %s repository's branches update! ======\n", data.RepositoryName)
 		processErrFlg := createLogDir(data.LogRepository)
 		if processErrFlg {
 			fmt.Println("createLogDir func failed")
 			continue
 		}
 
-		fp := createFilePointer()
-		defer fp.Close()
+		for _, branch := range data.TargetBranches {
+			fmt.Printf("%s ... ", branch)
+			fp := createFilePointer(data.LogRepository, branch)
+			defer fp.Close()
 
-		gitBranch(fp)
-		gitPullBranch(TRAGET_REPO, fp)
-		gitPushBrunch(TRAGET_REPO, fp)
-		gitCheckOutBrunch(MASTER_REPO, fp)
-		gitBranch(fp)
-		gitPullReleaseToTarget(TRAGET_REPO, MASTER_REPO, fp)
-		gitPushBrunch(TRAGET_REPO, fp)
+			gitBranch(fp)
+			gitPullBranch(TRAGET_REPO, fp)
+			gitPushBrunch(TRAGET_REPO, fp)
+			gitCheckOutBrunch(MASTER_REPO, fp)
+			gitBranch(fp)
+			gitPullReleaseToTarget(TRAGET_REPO, MASTER_REPO, fp)
+			gitPushBrunch(TRAGET_REPO, fp)
+
+		}
+		fmt.Println("Ok!!")
 	}
 }
 
@@ -90,11 +96,11 @@ func getConfigData(configFileName string) Setting {
 	return settingDatas
 }
 
-func createFilePointer() (fp *os.File) {
+func createFilePointer(logDirName string, branchName string) (fp *os.File) {
 	day := time.Now()
 	today_date := day.Format(DATE_LAYOUT)
 
-	fileName := fmt.Sprintf("%s-%s.log", today_date, TRAGET_REPO)
+	fileName := fmt.Sprintf("%s/%s/%s.log", logDirName, today_date, branchName)
 
 	fp, err := os.Create(fileName)
 	if err != nil {
