@@ -56,11 +56,11 @@ func main() {
 
 			gitBranch(fp)
 			gitPullBranch(TRAGET_REPO, fp)
-			gitPushBrunch(TRAGET_REPO, fp)
-			gitCheckOutBrunch(MASTER_REPO, fp)
+			gitPushBranch(TRAGET_REPO, fp)
+			gitCheckOutBranch(MASTER_REPO, fp)
 			gitBranch(fp)
 			gitPullReleaseToTarget(TRAGET_REPO, MASTER_REPO, fp)
-			gitPushBrunch(TRAGET_REPO, fp)
+			gitPushBranch(TRAGET_REPO, fp)
 
 		}
 		fmt.Println("Ok!!")
@@ -133,7 +133,7 @@ func gitPullBranch(repoName string, fp *os.File) {
 	fp.WriteString(string(output))
 }
 
-func gitPushBrunch(repoName string, fp *os.File) {
+func gitPushBranch(repoName string, fp *os.File) {
 	refsRepo := fmt.Sprintf("refs/heads/%s:refs/heads/%s", repoName, repoName)
 	fileWriteStr := fmt.Sprintf("\n--- git push --recurse-submodules=check origin %s ---\n", refsRepo)
 	fp.WriteString(fileWriteStr)
@@ -147,7 +147,7 @@ func gitPushBrunch(repoName string, fp *os.File) {
 	fp.WriteString(string(output))
 }
 
-func gitCheckOutBrunch(repoName string, fp *os.File) {
+func gitCheckOutBranch(repoName string, fp *os.File) {
 	fileWriteStr := fmt.Sprintf("\n--- git checkout %s ---\n", repoName)
 	fp.WriteString(fileWriteStr)
 
