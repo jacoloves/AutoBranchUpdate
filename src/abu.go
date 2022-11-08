@@ -49,6 +49,9 @@ func main() {
 			continue
 		}
 
+		// change directory
+		os.Chdir(data.MainRepository)
+
 		for _, branch := range data.TargetBranches {
 			fmt.Printf("%s ... ", branch)
 			fp := createFilePointer(data.LogRepository, branch)
