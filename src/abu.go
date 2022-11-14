@@ -26,7 +26,7 @@ type SettingData struct {
 	TargetBranches []string `json:"targetBranches"`
 }
 
-type Setting struct {
+type SettingArray struct {
 	SettingArray []SettingData `json:"settingArray"`
 }
 
@@ -54,19 +54,35 @@ func main() {
 
 		for _, branch := range data.TargetBranches {
 			fmt.Printf("%s ... ", branch)
-			fp := createFilePointer(data.LogRepository, branch)
+			fp, processErrFlg := createFilePointer(data.LogRepository, branch)
+			if processErrFlg {
+				fmt.Println("createFilePointer func failed")
+				fmt.Println("NG!!")
+				continue
+			}
 			defer fp.Close()
 
-			gitBranch(fp)
+			processErrFlg = gitBranch(fp)
+			if processErrFlg {
+				fmt.Println("gitBranch func failed")
+				fmt.Println("NG!!")
+				continue
+			}
 			gitPullBranch(TRAGET_REPO, fp)
 			gitPushBranch(TRAGET_REPO, fp)
 			gitCheckOutBranch(MASTER_REPO, fp)
-			gitBranch(fp)
+			processErrFlg = gitBranch(fp)
+			if processErrFlg {
+				fmt.Println("gitBranch func failed")
+				fmt.Println("NG!!")
+				continue
+			}
 			gitPullReleaseToTarget(TRAGET_REPO, MASTER_REPO, fp)
 			gitPushBranch(TRAGET_REPO, fp)
 
+			fmt.Println("Ok!!")
+
 		}
-		fmt.Println("Ok!!")
 	}
 }
 
@@ -83,14 +99,14 @@ func createLogDir(createLogDir string) bool {
 	return false
 }
 
-func getConfigData(configFileName string) Setting {
+func getConfigData(configFileName string) SettingArray {
 	raw, err := ioutil.ReadFile(configFileName)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	var settingDatas Setting
+	var settingDatas SettingArray
 	if err = json.Unmarshal(raw, &settingDatas); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -99,7 +115,7 @@ func getConfigData(configFileName string) Setting {
 	return settingDatas
 }
 
-func createFilePointer(logDirName string, branchName string) (fp *os.File) {
+func createFilePointer(logDirName string, branchName string) (fp *os.File, errFlg bool) {
 	day := time.Now()
 	today_date := day.Format(DATE_LAYOUT)
 
@@ -108,20 +124,22 @@ func createFilePointer(logDirName string, branchName string) (fp *os.File) {
 	fp, err := os.Create(fileName)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
+		return nil, true
 	}
 
-	return fp
+	return fp, false
 }
 
-func gitBranch(fp *os.File) {
+func gitBranch(fp *os.File) (errFlg bool) {
 	fp.WriteString("\n--- git branch ---\n")
 	output, err := exec.Command("git", "branch").CombinedOutput()
 	if err != nil {
 		errStr := fmt.Sprintf("%v\n", err)
 		fp.WriteString(errStr)
-		os.Exit(1)
+		return true
 	}
 	fp.WriteString(string(output))
+	return false
 }
 
 func gitPullBranch(repoName string, fp *os.File) {
