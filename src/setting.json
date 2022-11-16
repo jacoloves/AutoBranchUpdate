@@ -2,8 +2,8 @@
     "settingArray":[
         {
             "id": 1,
-            "mainRepository": "/home/stanaka/release/AutoBranchUpdate/src",
-            "logRepository": "/home/stanaka/tmp/release/AutoBranchUpdate/src/logs",
+            "mainRepository": "/home/stanaka/released/AutoBranchUpdate/src",
+            "logRepository": "/home/stanaka/released/AutoBranchUpdate/logs",
             "masterBranch": "master",
             "repositoryName": "AutoBranchUpdate",
             "targetBranches": [
