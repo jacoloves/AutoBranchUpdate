@@ -10,6 +10,34 @@
                 "feature",
                 "feature2"
             ]
+        },
+        {
+            "id": 2,
+            "mainRepository": "/home/stanaka/released/gsw",
+            "logRepository": "/home/stanaka/released/gsw/log",
+            "masterBranch": "master",
+            "repositoryName": "gsw",
+            "targetBranches": [
+                "test-feature",
+                "test-feature2",
+                "test-feature3",
+                "test-feature4"
+            ]
+        },
+        {
+            "id": 3,
+            "mainRepository": "/home/stanaka/released/tiro",
+            "logRepository": "/home/stanaka/released/tiro/log",
+            "masterBranch": "main",
+            "repositoryName": "tiro",
+            "targetBranches": [
+                "test-case1",
+                "test-case2",
+                "test-case3",
+                "test-case4",
+                "test-case5",
+                "test-case6"
+            ]
         }
     ]
 }
