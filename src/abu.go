@@ -42,6 +42,7 @@ func main() {
 	configArray := getConfigData(CONFIG_FILE)
 
 	for _, data := range configArray.SettingArray {
+		masterBranchOperationFlg := true
 		fmt.Printf("======= %s repository's branches update! ======\n", data.RepositoryName)
 		processErrFlg := createLogDir(data.LogRepository)
 		if processErrFlg {
@@ -54,36 +55,73 @@ func main() {
 
 		for _, branch := range data.TargetBranches {
 			fmt.Printf("%s ... ", branch)
+			// filepointer creates
 			fp, processErrFlg := createFilePointer(data.LogRepository, branch)
 			if processErrFlg {
-				fmt.Println("createFilePointer func failed")
 				fmt.Println("NG!!")
 				continue
 			}
 			defer fp.Close()
 
-			processErrFlg = gitBranch(fp)
+			// For the first time, the operation of masterBranch is executed.
+			if masterBranchOperationFlg {
+				// master branch checkout
+				processErrFlg = gitCheckOutBranch(data.MasterBranch, fp)
+				if processErrFlg {
+					fmt.Println("NG!!")
+					continue
+				}
+				// master branch pull
+				processErrFlg = gitPullBranch(data.MainRepository, fp)
+				if processErrFlg {
+					fmt.Println("NG!!")
+					continue
+				}
+
+				// flg data chnage
+				masterBranchOperationFlg = false
+			}
+
+			// target branch checkout
+			processErrFlg = gitCheckOutBranch(branch, fp)
 			if processErrFlg {
-				fmt.Println("gitBranch func failed")
 				fmt.Println("NG!!")
 				continue
 			}
-			gitPullBranch(TRAGET_REPO, fp)
-			gitPushBranch(TRAGET_REPO, fp)
-			gitCheckOutBranch(MASTER_REPO, fp)
-			processErrFlg = gitBranch(fp)
+
+			// target branch pull
+			processErrFlg = gitPullBranch(branch, fp)
 			if processErrFlg {
-				fmt.Println("gitBranch func failed")
 				fmt.Println("NG!!")
 				continue
 			}
-			gitPullReleaseToTarget(TRAGET_REPO, MASTER_REPO, fp)
-			gitPushBranch(TRAGET_REPO, fp)
+
+			// target branch push
+			processErrFlg = gitPushBranch(branch, fp)
+			if processErrFlg {
+				fmt.Println("NG!!")
+				continue
+			}
+
+			// git pull master branch to target branch
+			gitPullReleaseToTarget(data.MasterBranch, fp)
+			if processErrFlg {
+				fmt.Println("NG!!")
+				continue
+			}
+
+			// target branch push
+			processErrFlg = gitPushBranch(branch, fp)
+			if processErrFlg {
+				fmt.Println("NG!!")
+				continue
+			}
 
 			fmt.Println("Ok!!")
 
 		}
 	}
+	fmt.Println("!!!AutoBranchUpdate complete!!!")
 }
 
 func createLogDir(createLogDir string) bool {
@@ -130,9 +168,10 @@ func createFilePointer(logDirName string, branchName string) (fp *os.File, errFl
 	return fp, false
 }
 
-func gitBranch(fp *os.File) (errFlg bool) {
-	fp.WriteString("\n--- git branch ---\n")
-	output, err := exec.Command("git", "branch").CombinedOutput()
+func gitPullBranch(repoName string, fp *os.File) (errFlg bool) {
+	fp.WriteString("\n--- git pull --progress origin ---\n")
+
+	output, err := exec.Command("git", "pull", "--progress", "origin").CombinedOutput()
 	if err != nil {
 		errStr := fmt.Sprintf("%v\n", err)
 		fp.WriteString(errStr)
@@ -142,19 +181,7 @@ func gitBranch(fp *os.File) (errFlg bool) {
 	return false
 }
 
-func gitPullBranch(repoName string, fp *os.File) {
-	fp.WriteString("\n--- git pull --progress origin ---\n")
-
-	output, err := exec.Command("git", "pull", "--progress", "origin").CombinedOutput()
-	if err != nil {
-		errStr := fmt.Sprintf("%v\n", err)
-		fp.WriteString(errStr)
-		os.Exit(1)
-	}
-	fp.WriteString(string(output))
-}
-
-func gitPushBranch(repoName string, fp *os.File) {
+func gitPushBranch(repoName string, fp *os.File) (errFlg bool) {
 	refsRepo := fmt.Sprintf("refs/heads/%s:refs/heads/%s", repoName, repoName)
 	fileWriteStr := fmt.Sprintf("\n--- git push --recurse-submodules=check origin %s ---\n", refsRepo)
 	fp.WriteString(fileWriteStr)
@@ -163,12 +190,13 @@ func gitPushBranch(repoName string, fp *os.File) {
 	if err != nil {
 		errStr := fmt.Sprintf("%v\n", err)
 		fp.WriteString(errStr)
-		os.Exit(1)
+		return true
 	}
 	fp.WriteString(string(output))
+	return false
 }
 
-func gitCheckOutBranch(repoName string, fp *os.File) {
+func gitCheckOutBranch(repoName string, fp *os.File) (errFlg bool) {
 	fileWriteStr := fmt.Sprintf("\n--- git checkout %s ---\n", repoName)
 	fp.WriteString(fileWriteStr)
 
@@ -177,22 +205,23 @@ func gitCheckOutBranch(repoName string, fp *os.File) {
 	if err != nil {
 		errStr := fmt.Sprintf("%v\n", err)
 		fp.WriteString(errStr)
-		os.Exit(1)
+		return true
 	}
 	fp.WriteString(string(output))
+	return false
 }
 
-func gitPullReleaseToTarget(repoName string, masterRepoName string, fp *os.File) {
-	refsMasterRepo := fmt.Sprintf("refs/heads/%s", masterRepoName)
-	fileWriteStr := fmt.Sprintf("\n--- git pull --progress origin %s ---\n", refsMasterRepo)
+func gitPullReleaseToTarget(masterRepoName string, fp *os.File) (errFlg bool) {
+	refsMasterRepo := fmt.Sprintf("+refs/heads/%s", masterRepoName)
+	fileWriteStr := fmt.Sprintf("\n--- git pull --progress origin %s ---\n", masterRepoName)
 	fp.WriteString(fileWriteStr)
 
 	output, err := exec.Command("git", "pull", "--progress", "origin", refsMasterRepo).CombinedOutput()
 	if err != nil {
 		errStr := fmt.Sprintf("%v\n", err)
 		fp.WriteString(errStr)
-		os.Exit(1)
+		return true
 	}
 	fp.WriteString(string(output))
-
+	return false
 }
