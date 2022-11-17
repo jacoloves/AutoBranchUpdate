@@ -2,8 +2,8 @@
     "settingArray":[
         {
             "id": 1,
-            "mainRepository": "$HOME/released/AutoBranchUpdate/src",
-            "logRepository": "$HOME/released/AutoBranchUpdate/src/log",
+            "mainRepository": "~/released/AutoBranchUpdate/src",
+            "logRepository": "~/released/AutoBranchUpdate/src/log",
             "masterBranch": "master",
             "repositoryName": "AutoBranchUpdate",
             "targetBranches": [
@@ -13,8 +13,8 @@
         },
         {
             "id": 2,
-            "mainRepository": "$HOME/released/gsw",
-            "logRepository": "$HOME/released/gsw/log",
+            "mainRepository": "~/released/gsw",
+            "logRepository": "~/released/gsw/log",
             "masterBranch": "master",
             "repositoryName": "gsw",
             "targetBranches": [
@@ -26,8 +26,8 @@
         },
         {
             "id": 3,
-            "mainRepository": "$HOME/released/tiro",
-            "logRepository": "$HOME/released/tiro/log",
+            "mainRepository": "~/released/tiro",
+            "logRepository": "~/released/tiro/log",
             "masterBranch": "main",
             "repositoryName": "tiro",
             "targetBranches": [

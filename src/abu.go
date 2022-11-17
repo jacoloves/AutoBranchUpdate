@@ -6,7 +6,9 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -136,9 +138,18 @@ func printResultColor(errFlg bool) {
 	}
 }
 
+func replaceTildeToHomedir(dirName string) string {
+	usr, _ := user.Current()
+	replacedDirName := strings.Replace(dirName, "~", usr.HomeDir, 1)
+
+	return replacedDirName
+}
+
 func createLogDir(createLogDir string) bool {
 	day := time.Now()
 	today_date := day.Format(DATE_LAYOUT)
+
+	createLogDir = replaceTildeToHomedir(createLogDir)
 
 	os.Chdir(createLogDir)
 	if err := os.Mkdir(today_date, 0777); err != nil {
@@ -168,6 +179,8 @@ func getConfigData(configFileName string) SettingArray {
 func createFilePointer(logDirName string, branchName string) (fp *os.File, errFlg bool) {
 	day := time.Now()
 	today_date := day.Format(DATE_LAYOUT)
+
+	logDirName = replaceTildeToHomedir(logDirName)
 
 	fileName := fmt.Sprintf("%s/%s/%s.log", logDirName, today_date, branchName)
 
