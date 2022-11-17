@@ -6,7 +6,9 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -58,7 +60,7 @@ func main() {
 			// filepointer creates
 			fp, processErrFlg := createFilePointer(data.LogRepository, branch)
 			if processErrFlg {
-				fmt.Println("NG!!")
+				printResultColor(processErrFlg)
 				continue
 			}
 			defer fp.Close()
@@ -68,13 +70,13 @@ func main() {
 				// master branch checkout
 				processErrFlg = gitCheckOutBranch(data.MasterBranch, fp)
 				if processErrFlg {
-					fmt.Println("NG!!")
+					printResultColor(processErrFlg)
 					continue
 				}
 				// master branch pull
 				processErrFlg = gitPullBranch(data.MainRepository, fp)
 				if processErrFlg {
-					fmt.Println("NG!!")
+					printResultColor(processErrFlg)
 					continue
 				}
 
@@ -85,48 +87,69 @@ func main() {
 			// target branch checkout
 			processErrFlg = gitCheckOutBranch(branch, fp)
 			if processErrFlg {
-				fmt.Println("NG!!")
+				printResultColor(processErrFlg)
 				continue
 			}
 
 			// target branch pull
 			processErrFlg = gitPullBranch(branch, fp)
 			if processErrFlg {
-				fmt.Println("NG!!")
+				printResultColor(processErrFlg)
 				continue
 			}
 
 			// target branch push
 			processErrFlg = gitPushBranch(branch, fp)
 			if processErrFlg {
-				fmt.Println("NG!!")
+				printResultColor(processErrFlg)
 				continue
 			}
 
 			// git pull master branch to target branch
 			gitPullReleaseToTarget(data.MasterBranch, fp)
 			if processErrFlg {
-				fmt.Println("NG!!")
+				printResultColor(processErrFlg)
 				continue
 			}
 
 			// target branch push
 			processErrFlg = gitPushBranch(branch, fp)
 			if processErrFlg {
-				fmt.Println("NG!!")
+				printResultColor(processErrFlg)
 				continue
 			}
 
-			fmt.Println("Ok!!")
+			printResultColor(processErrFlg)
 
 		}
 	}
 	fmt.Println("!!!AutoBranchUpdate complete!!!")
 }
 
+func printResultColor(errFlg bool) {
+	if errFlg {
+		fmt.Print("\x1b[38;2;255;0;0m")
+		fmt.Println("NG!!")
+		fmt.Print("\x1b[0m")
+	} else {
+		fmt.Print("\x1b[38;2;0;126;0m")
+		fmt.Println("OK!!")
+		fmt.Print("\x1b[0m")
+	}
+}
+
+func replaceTildeToHomedir(dirName string) string {
+	usr, _ := user.Current()
+	replacedDirName := strings.Replace(dirName, "~", usr.HomeDir, 1)
+
+	return replacedDirName
+}
+
 func createLogDir(createLogDir string) bool {
 	day := time.Now()
 	today_date := day.Format(DATE_LAYOUT)
+
+	createLogDir = replaceTildeToHomedir(createLogDir)
 
 	os.Chdir(createLogDir)
 	if err := os.Mkdir(today_date, 0777); err != nil {
@@ -157,6 +180,8 @@ func createFilePointer(logDirName string, branchName string) (fp *os.File, errFl
 	day := time.Now()
 	today_date := day.Format(DATE_LAYOUT)
 
+	logDirName = replaceTildeToHomedir(logDirName)
+
 	fileName := fmt.Sprintf("%s/%s/%s.log", logDirName, today_date, branchName)
 
 	fp, err := os.Create(fileName)
@@ -174,6 +199,7 @@ func gitPullBranch(repoName string, fp *os.File) (errFlg bool) {
 	output, err := exec.Command("git", "pull", "--progress", "origin").CombinedOutput()
 	if err != nil {
 		errStr := fmt.Sprintf("%v\n", err)
+		fp.WriteString(string(output))
 		fp.WriteString(errStr)
 		return true
 	}
@@ -189,6 +215,7 @@ func gitPushBranch(repoName string, fp *os.File) (errFlg bool) {
 	output, err := exec.Command("git", "push", "--recurse-submodules=check", "origin", refsRepo).CombinedOutput()
 	if err != nil {
 		errStr := fmt.Sprintf("%v\n", err)
+		fp.WriteString(string(output))
 		fp.WriteString(errStr)
 		return true
 	}
@@ -204,6 +231,7 @@ func gitCheckOutBranch(repoName string, fp *os.File) (errFlg bool) {
 	output, err := exec.Command("git", "checkout", repoName).CombinedOutput()
 	if err != nil {
 		errStr := fmt.Sprintf("%v\n", err)
+		fp.WriteString(string(output))
 		fp.WriteString(errStr)
 		return true
 	}
@@ -219,6 +247,7 @@ func gitPullReleaseToTarget(masterRepoName string, fp *os.File) (errFlg bool) {
 	output, err := exec.Command("git", "pull", "--progress", "origin", refsMasterRepo).CombinedOutput()
 	if err != nil {
 		errStr := fmt.Sprintf("%v\n", err)
+		fp.WriteString(string(output))
 		fp.WriteString(errStr)
 		return true
 	}
