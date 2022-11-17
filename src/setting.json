@@ -2,8 +2,8 @@
     "settingArray":[
         {
             "id": 1,
-            "mainRepository": "/home/stanaka/released/AutoBranchUpdate/src",
-            "logRepository": "/home/stanaka/released/AutoBranchUpdate/src/log",
+            "mainRepository": "$HOME/released/AutoBranchUpdate/src",
+            "logRepository": "$HOME/released/AutoBranchUpdate/src/log",
             "masterBranch": "master",
             "repositoryName": "AutoBranchUpdate",
             "targetBranches": [
@@ -13,8 +13,8 @@
         },
         {
             "id": 2,
-            "mainRepository": "/home/stanaka/released/gsw",
-            "logRepository": "/home/stanaka/released/gsw/log",
+            "mainRepository": "$HOME/released/gsw",
+            "logRepository": "$HOME/released/gsw/log",
             "masterBranch": "master",
             "repositoryName": "gsw",
             "targetBranches": [
@@ -26,8 +26,8 @@
         },
         {
             "id": 3,
-            "mainRepository": "/home/stanaka/released/tiro",
-            "logRepository": "/home/stanaka/released/tiro/log",
+            "mainRepository": "$HOME/released/tiro",
+            "logRepository": "$HOME/released/tiro/log",
             "masterBranch": "main",
             "repositoryName": "tiro",
             "targetBranches": [
