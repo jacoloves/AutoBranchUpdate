@@ -29,24 +29,17 @@ var yesstrings = []string{
 	"      y",
 }
 
-func Test_gitBranch(t *testing.T) {
-	fmt.Println("--- Test gitBranch ---")
-	prev, err := filepath.Abs(".")
-	if err != nil {
-		os.Exit(1)
-	}
-	defer os.Chdir(prev)
+type SettingData struct {
+	Id             int      `json:"id"`
+	MainRepository string   `json:"mainRepository"`
+	LogRepository  string   `json:"logRepository"`
+	MasterBranch   string   `json:"masterBranch"`
+	RepositoryName string   `json:"repositoryName"`
+	TargetBranches []string `json:"targetBranches"`
+}
 
-	for _, dir := range testdirs {
-		target, err := filepath.Abs(dir)
-		if err != nil {
-			os.Exit(1)
-		}
-
-		os.Chdir(target)
-
-		gitBranch()
-	}
+type SettingArray struct {
+	SettingArray []SettingData `json:"settingArray"`
 }
 
 func Test_gitPullBranch(t *testing.T) {
@@ -222,4 +215,17 @@ func Test_gitPullReleaseToTarget(t *testing.T) {
 		gitPullReleaseToTarget(in, "feature", "master")
 	}
 
+}
+
+func Test_getConfigData(t *testing.T) {
+	fmt.Println("--- Test getConfigData ---")
+
+	fmt.Println("--- error ReadFile ---")
+	_ = getConfigData("./notexist.json")
+
+	fmt.Println("-- error Unmarshal ---")
+	_ = getConfigData("./unmarshalng.json")
+
+	fmt.Println("--- pass process ---")
+	_ = getConfigData("./setting.json")
 }
