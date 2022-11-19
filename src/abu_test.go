@@ -50,7 +50,13 @@ func Test_gitPullBranch(t *testing.T) {
 	}
 	defer os.Chdir(prev)
 
-	fmt.Println("--- directory change test y ---")
+	fp, err := os.Create("test_abu.log")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
+	}
+	defer fp.Close()
+
 	for _, dir := range testdirs {
 		target, err := filepath.Abs(dir)
 		if err != nil {
@@ -58,33 +64,9 @@ func Test_gitPullBranch(t *testing.T) {
 		}
 
 		os.Chdir(target)
-
-		in := bytes.NewBufferString("y")
-		gitPullBranch(in, "feature")
+		_ = gitPullBranch("feature", fp)
 	}
 
-	fmt.Println("--- directory change test n ---")
-	for _, dir := range testdirs {
-		target, err := filepath.Abs(dir)
-		if err != nil {
-			os.Exit(1)
-		}
-
-		os.Chdir(target)
-
-		in := bytes.NewBufferString("n")
-		gitPullBranch(in, "feature")
-	}
-
-	fmt.Println("--- input nil test ---")
-	gitPullBranch(nil, "feature")
-
-	fmt.Println("--- input yes strings test ---")
-	os.Chdir(prev)
-	for _, input := range yesstrings {
-		in := bytes.NewBufferString(input)
-		gitPullBranch(in, "feature")
-	}
 }
 
 func Test_gitPushBranch(t *testing.T) {
