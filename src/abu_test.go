@@ -14,22 +14,7 @@ var testdirs = []string{
 	"/home/tests/test_abu_dir", // test direcotry git branch exist but remote repository no exist
 }
 
-var yesstrings = []string{
-	"y",
-	"Y",
-	"yes",
-	"YES",
-	"yas",
-	"YeS",
-	"yeS",
-	"Yes",
-	"year!",
-	" y ",
-	"y    ",
-	"      y",
-}
-
-type SettingData struct {
+type BranchInformation struct {
 	Id             int      `json:"id"`
 	MainRepository string   `json:"mainRepository"`
 	LogRepository  string   `json:"logRepository"`
@@ -38,8 +23,8 @@ type SettingData struct {
 	TargetBranches []string `json:"targetBranches"`
 }
 
-type SettingArray struct {
-	SettingArray []SettingData `json:"settingArray"`
+type BranchInformations struct {
+	BranchInformations []BranchInformation `json:"settingArray"`
 }
 
 func Test_gitPullBranch(t *testing.T) {
@@ -77,6 +62,13 @@ func Test_gitPushBranch(t *testing.T) {
 	}
 	defer os.Chdir(prev)
 
+	fp, err := os.Create("test_abu.log")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
+	}
+	defer fp.Close()
+
 	for _, dir := range testdirs {
 		target, err := filepath.Abs(dir)
 		if err != nil {
@@ -85,30 +77,7 @@ func Test_gitPushBranch(t *testing.T) {
 
 		os.Chdir(target)
 
-		in := bytes.NewBufferString("y")
-		gitPushBrunch(in, "feature")
-	}
-
-	for _, dir := range testdirs {
-		target, err := filepath.Abs(dir)
-		if err != nil {
-			os.Exit(1)
-		}
-
-		os.Chdir(target)
-
-		in := bytes.NewBufferString("n")
-		gitPushBrunch(in, "feature")
-	}
-
-	fmt.Println("--- input nil test ---")
-	gitPushBrunch(nil, "feature")
-
-	fmt.Println("--- input yes strings test ---")
-	os.Chdir(prev)
-	for _, input := range yesstrings {
-		in := bytes.NewBufferString(input)
-		gitPushBrunch(in, "feature")
+		_ = gitPushBranch("feature", fp)
 	}
 }
 
