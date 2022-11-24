@@ -89,6 +89,13 @@ func Test_gitCheckOutBrunch(T *testing.T) {
 	}
 	defer os.Chdir(prev)
 
+	fp, err := os.Create("test_abu.log")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
+	}
+	defer fp.Close()
+
 	for _, dir := range testdirs {
 		target, err := filepath.Abs(dir)
 		if err != nil {
@@ -97,31 +104,9 @@ func Test_gitCheckOutBrunch(T *testing.T) {
 
 		os.Chdir(target)
 
-		in := bytes.NewBufferString("y")
-		gitCheckOutBrunch(in, "feature")
+		_ = gitCheckOutBrunch("feature", fp)
 	}
 
-	for _, dir := range testdirs {
-		target, err := filepath.Abs(dir)
-		if err != nil {
-			os.Exit(1)
-		}
-
-		os.Chdir(target)
-
-		in := bytes.NewBufferString("n")
-		gitCheckOutBrunch(in, "feature")
-	}
-
-	fmt.Println("--- input nil test ---")
-	gitCheckOutBrunch(nil, "feature")
-
-	fmt.Println("--- nil yes strings test ---")
-	os.Chdir(prev)
-	for _, input := range yesstrings {
-		in := bytes.NewBufferString(input)
-		gitCheckOutBrunch(in, "feature")
-	}
 }
 
 func Test_gitPullReleaseToTarget(t *testing.T) {
