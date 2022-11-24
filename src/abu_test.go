@@ -23,8 +23,8 @@ type BranchInformation struct {
 	TargetBranches []string `json:"targetBranches"`
 }
 
-type BranchInformations struct {
-	BranchInformations []BranchInformation `json:"settingArray"`
+type BranchInformationArray struct {
+	BranchInformationArray []BranchInformation `json:"branchInformationArray"`
 }
 
 func Test_gitPullBranch(t *testing.T) {

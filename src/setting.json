@@ -1,5 +1,5 @@
 {
-    "settingArray":[
+    "branchInformationArray":[
         {
             "id": 1,
             "mainRepository": "~/released/AutoBranchUpdate/src",
