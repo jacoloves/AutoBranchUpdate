@@ -19,7 +19,7 @@ const (
 	CONFIG_FILE = "./setting.json"
 )
 
-type SettingData struct {
+type BranchInformation struct {
 	Id             int      `json:"id"`
 	MainRepository string   `json:"mainRepository"`
 	LogRepository  string   `json:"logRepository"`
@@ -28,8 +28,8 @@ type SettingData struct {
 	TargetBranches []string `json:"targetBranches"`
 }
 
-type SettingArray struct {
-	SettingArray []SettingData `json:"settingArray"`
+type BranchInformationArray struct {
+	BranchInformationArray []BranchInformation `json:"branchInformationArray"`
 }
 
 func main() {
