@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -117,6 +116,13 @@ func Test_gitPullReleaseToTarget(t *testing.T) {
 	}
 	defer os.Chdir(prev)
 
+	fp, err := os.Create("test_abu.log")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
+	}
+	defer fp.Close()
+
 	for _, dir := range testdirs {
 		target, err := filepath.Abs(dir)
 		if err != nil {
@@ -125,30 +131,7 @@ func Test_gitPullReleaseToTarget(t *testing.T) {
 
 		os.Chdir(target)
 
-		in := bytes.NewBufferString("y")
-		gitPullReleaseToTarget(in, "feature", "master")
-	}
-
-	for _, dir := range testdirs {
-		target, err := filepath.Abs(dir)
-		if err != nil {
-			os.Exit(1)
-		}
-
-		os.Chdir(target)
-
-		in := bytes.NewBufferString("n")
-		gitPullReleaseToTarget(in, "feature", "master")
-	}
-
-	fmt.Println("--- input nil test ---")
-	gitPullReleaseToTarget(nil, "feature", "master")
-
-	fmt.Println("--- input yes strings test ---")
-	os.Chdir(prev)
-	for _, input := range yesstrings {
-		in := bytes.NewBufferString(input)
-		gitPullReleaseToTarget(in, "feature", "master")
+		_ = gitPullReleaseToTarget("feature", fp)
 	}
 
 }
