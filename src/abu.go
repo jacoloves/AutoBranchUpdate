@@ -43,7 +43,7 @@ func main() {
 	// Json file data get
 	configArray := getConfigData(CONFIG_FILE)
 
-	for _, data := range configArray.SettingArray {
+	for _, data := range configArray.BranchInformationArray {
 		masterBranchOperationFlg := true
 		fmt.Printf("======= %s repository's branches update! ======\n", data.RepositoryName)
 		processErrFlg := createLogDir(data.LogRepository)
@@ -160,20 +160,20 @@ func createLogDir(createLogDir string) bool {
 	return false
 }
 
-func getConfigData(configFileName string) SettingArray {
+func getConfigData(configFileName string) BranchInformationArray {
 	raw, err := ioutil.ReadFile(configFileName)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	var settingDatas SettingArray
-	if err = json.Unmarshal(raw, &settingDatas); err != nil {
+	var branchDatas BranchInformationArray
+	if err = json.Unmarshal(raw, &branchDatas); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	return settingDatas
+	return branchDatas
 }
 
 func createFilePointer(logDirName string, branchName string) (fp *os.File, errFlg bool) {
