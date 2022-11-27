@@ -13,7 +13,7 @@ var testdirs = []string{
 	"/home/tests/test_abu_dir", // test direcotry git branch exist but remote repository no exist
 }
 
-type BranchInformation struct {
+type TestBranchInformation struct {
 	Id             int      `json:"id"`
 	MainRepository string   `json:"mainRepository"`
 	LogRepository  string   `json:"logRepository"`
@@ -22,8 +22,8 @@ type BranchInformation struct {
 	TargetBranches []string `json:"targetBranches"`
 }
 
-type BranchInformationArray struct {
-	BranchInformationArray []BranchInformation `json:"branchInformationArray"`
+type TestBranchInformationArray struct {
+	TestBranchInformationArray []TestBranchInformation `json:"branchInformationArray"`
 }
 
 func Test_gitPullBranch(t *testing.T) {
@@ -80,7 +80,7 @@ func Test_gitPushBranch(t *testing.T) {
 	}
 }
 
-func Test_gitCheckOutBrunch(T *testing.T) {
+func Test_gitCheckOutBranch(T *testing.T) {
 	fmt.Println("--- Test gitCheckOutBrunch ---")
 	prev, err := filepath.Abs(".")
 	if err != nil {
@@ -103,7 +103,7 @@ func Test_gitCheckOutBrunch(T *testing.T) {
 
 		os.Chdir(target)
 
-		_ = gitCheckOutBrunch("feature", fp)
+		_ = gitCheckOutBranch("feature", fp)
 	}
 
 }
