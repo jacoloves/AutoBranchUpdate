@@ -27,7 +27,6 @@ type TestBranchInformationArray struct {
 }
 
 func Test_gitPullBranch(t *testing.T) {
-	fmt.Println("--- Test gitPullBranch ---")
 	prev, err := filepath.Abs(".")
 	if err != nil {
 		os.Exit(1)
@@ -54,7 +53,6 @@ func Test_gitPullBranch(t *testing.T) {
 }
 
 func Test_gitPushBranch(t *testing.T) {
-	fmt.Println("--- Test gitPushBranch ---")
 	prev, err := filepath.Abs(".")
 	if err != nil {
 		os.Exit(1)
@@ -81,7 +79,6 @@ func Test_gitPushBranch(t *testing.T) {
 }
 
 func Test_gitCheckOutBranch(T *testing.T) {
-	fmt.Println("--- Test gitCheckOutBrunch ---")
 	prev, err := filepath.Abs(".")
 	if err != nil {
 		os.Exit(1)
@@ -109,7 +106,6 @@ func Test_gitCheckOutBranch(T *testing.T) {
 }
 
 func Test_gitPullReleaseToTarget(t *testing.T) {
-	fmt.Println("--- Test gitPullReleaseToTarget ---")
 	prev, err := filepath.Abs(".")
 	if err != nil {
 		os.Exit(1)
@@ -137,14 +133,10 @@ func Test_gitPullReleaseToTarget(t *testing.T) {
 }
 
 func Test_getConfigData(t *testing.T) {
-	fmt.Println("--- Test getConfigData ---")
+	_, _ = getConfigData("./notexist.json")
 
-	fmt.Println("--- error ReadFile ---")
-	_ = getConfigData("./notexist.json")
+	_, _ = getConfigData("./unmarshalng.json")
 
-	fmt.Println("-- error Unmarshal ---")
-	_ = getConfigData("./unmarshalng.json")
+	_, _ = getConfigData("./setting.json")
 
-	fmt.Println("--- pass process ---")
-	_ = getConfigData("./setting.json")
 }
