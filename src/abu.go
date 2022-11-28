@@ -36,12 +36,15 @@ func main() {
 	// current direcotry get
 	prev, err := filepath.Abs(".")
 	if err != nil {
-		os.Exit(1)
+		panic(err)
 	}
 	defer os.Chdir(prev)
 
 	// Json file data get
-	configArray := getConfigData(CONFIG_FILE)
+	configArray, err := getConfigData(CONFIG_FILE)
+	if err != nil {
+		panic(err)
+	}
 
 	for _, data := range configArray.BranchInformationArray {
 		masterBranchOperationFlg := true
@@ -160,20 +163,18 @@ func createLogDir(createLogDir string) bool {
 	return false
 }
 
-func getConfigData(configFileName string) BranchInformationArray {
+func getConfigData(configFileName string) (BranchInformationArray, error) {
+	var branchDatas BranchInformationArray
 	raw, err := ioutil.ReadFile(configFileName)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return branchDatas, fmt.Errorf("setting file is not exist")
 	}
 
-	var branchDatas BranchInformationArray
 	if err = json.Unmarshal(raw, &branchDatas); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return branchDatas, fmt.Errorf("json file unmarhal process err")
 	}
 
-	return branchDatas
+	return branchDatas, nil
 }
 
 func createFilePointer(logDirName string, branchName string) (fp *os.File, errFlg bool) {
