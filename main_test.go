@@ -140,3 +140,13 @@ func Test_getConfigData(t *testing.T) {
 	_, _ = getConfigData("./setting.json")
 
 }
+
+func Test_printResultColor(t *testing.T) {
+	printResultColor(true)
+	printResultColor(false)
+}
+
+func Test_replaceTildeToHomedir(t *testing.T) {
+	_ = replaceTildeToHomedir("~/test/dir/tilde")
+	_ = replaceTildeToHomedir("/home/test/dir/notilde")
+}
