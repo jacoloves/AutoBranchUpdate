@@ -12,5 +12,4 @@ before_install:
   - go get golang.org/x/tools/cmd/cover
 script:
   - go test -v -covermode=count -coverprofile=coverage.out
-  - $HOME/go/bin/goveralls -coverprofile-coverage.out -service=travis-vi -repotoken
-  - L5Il8F39agSeqN6TXj3BzvgVIEbYQ2rRf
+  - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-vi -repotoken L5Il8F39agSeqN6TXj3BzvgVIEbYQ2rRf
