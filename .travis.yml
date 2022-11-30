@@ -1,6 +1,12 @@
 language: go
+os:
+  - linux
+  - osx
+arch:
+  - amd64
+  - arm64
 go:
-  - "1.2"
+  - master
 before_install: 
   - go get github.com/mattn/goveralls
   - go get golang.org/x/tools/cmd/cover
