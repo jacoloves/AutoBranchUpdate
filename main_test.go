@@ -5,7 +5,10 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
+
+const TEST_DATE_LAYOUT = "20060102"
 
 var testdirs = []string{
 	".",                        // current direcotry git branch exist
@@ -149,4 +152,16 @@ func Test_printResultColor(t *testing.T) {
 func Test_replaceTildeToHomedir(t *testing.T) {
 	_ = replaceTildeToHomedir("~/test/dir/tilde")
 	_ = replaceTildeToHomedir("/home/test/dir/notilde")
+}
+
+func Test_createLogDir(t *testing.T) {
+	_ = createLogDir("/home/stanaka/released/AutoBranchUpdate/test")
+
+	_ = createLogDir("/home/stanaka/released/AutoBranchUpdate/err_test/")
+
+	day := time.Now()
+	today_date := day.Format(DATE_LAYOUT)
+
+	removeDir := fmt.Sprintf("/home/stanaka/released/AutoBranchUpdate/test/%s", today_date)
+	os.Remove(removeDir)
 }
