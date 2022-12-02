@@ -160,8 +160,23 @@ func Test_createLogDir(t *testing.T) {
 	_ = createLogDir("/home/stanaka/released/AutoBranchUpdate/err_test/")
 
 	day := time.Now()
-	today_date := day.Format(DATE_LAYOUT)
+	today_date := day.Format(TEST_DATE_LAYOUT)
 
+	removeDir := fmt.Sprintf("/home/stanaka/released/AutoBranchUpdate/test/%s", today_date)
+	os.Remove(removeDir)
+}
+
+func Test_createFilePointer(t *testing.T) {
+	_ = createLogDir("/home/stanaka/released/AutoBranchUpdate/test")
+
+	_, _ = createFilePointer("~/released/AutoBranchUpdate/test", "test_ok")
+
+	_, _ = createFilePointer("~/released/AutoBranchUpdate/err_test", "test_ng")
+
+	day := time.Now()
+	today_date := day.Format(TEST_DATE_LAYOUT)
+	removeFile := fmt.Sprintf("/home/stanaka/released/AutoBranchUpdate/test/%s/%s", today_date, "test_ok")
+	os.Remove(removeFile)
 	removeDir := fmt.Sprintf("/home/stanaka/released/AutoBranchUpdate/test/%s", today_date)
 	os.Remove(removeDir)
 }
