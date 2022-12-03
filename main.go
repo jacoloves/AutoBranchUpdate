@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"os/user"
@@ -32,18 +33,18 @@ type BranchInformationArray struct {
 	BranchInformationArray []BranchInformation `json:"branchInformationArray"`
 }
 
-func main() {
+func autoBranchUpdate() error {
 	// current direcotry get
 	prev, err := filepath.Abs(".")
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer os.Chdir(prev)
 
 	// Json file data get
 	configArray, err := getConfigData(CONFIG_FILE)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	for _, data := range configArray.BranchInformationArray {
@@ -126,7 +127,7 @@ func main() {
 
 		}
 	}
-	fmt.Println("!!!AutoBranchUpdate complete!!!")
+	return nil
 }
 
 func printResultColor(errFlg bool) {
@@ -254,4 +255,11 @@ func gitPullReleaseToTarget(masterRepoName string, fp *os.File) (errFlg bool) {
 	}
 	fp.WriteString(string(output))
 	return false
+}
+
+func main() {
+	if err := autoBranchUpdate(); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("!!!AutoBranchUpdate complete!!!")
 }
