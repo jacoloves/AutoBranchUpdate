@@ -180,3 +180,34 @@ func Test_createFilePointer(t *testing.T) {
 	removeDir := fmt.Sprintf("/home/stanaka/released/AutoBranchUpdate/test/%s", today_date)
 	os.Remove(removeDir)
 }
+
+func Test_autoBranchUpdate(t *testing.T) {
+	_ = TestBranchInformation{
+		Id:             1,
+		MainRepository: "test",
+		LogRepository:  "test",
+		MasterBranch:   "test",
+		RepositoryName: "test",
+		TargetBranches: []string{"test", "test2"},
+	}
+
+	a := BranchInformationArray{
+		[]BranchInformation{
+			{
+				Id:             1,
+				MainRepository: "~/released/AutoBranchUpdate",
+				LogRepository:  "~/released/AutoBranchUpdate/test/log",
+				MasterBranch:   "master",
+				RepositoryName: "AutoBranchUpdate",
+				TargetBranches: []string{"feature", "feature2"},
+			},
+		},
+	}
+
+	for _, ii := range a.BranchInformationArray {
+		fmt.Println(ii)
+	}
+
+	_ = autoBranchUpdate(a)
+
+}
