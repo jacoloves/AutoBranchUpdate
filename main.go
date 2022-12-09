@@ -4,9 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -17,7 +20,7 @@ const (
 	CONFIG_FILE = "./setting.json"
 )
 
-type SettingData struct {
+type BranchInformation struct {
 	Id             int      `json:"id"`
 	MainRepository string   `json:"mainRepository"`
 	LogRepository  string   `json:"logRepository"`
@@ -26,22 +29,19 @@ type SettingData struct {
 	TargetBranches []string `json:"targetBranches"`
 }
 
-type SettingArray struct {
-	SettingArray []SettingData `json:"settingArray"`
+type BranchInformationArray struct {
+	BranchInformationArray []BranchInformation `json:"branchInformationArray"`
 }
 
-func main() {
+func autoBranchUpdate(configArray BranchInformationArray) error {
 	// current direcotry get
 	prev, err := filepath.Abs(".")
 	if err != nil {
-		os.Exit(1)
+		return err
 	}
 	defer os.Chdir(prev)
 
-	// Json file data get
-	configArray := getConfigData(CONFIG_FILE)
-
-	for _, data := range configArray.SettingArray {
+	for _, data := range configArray.BranchInformationArray {
 		masterBranchOperationFlg := true
 		fmt.Printf("======= %s repository's branches update! ======\n", data.RepositoryName)
 		processErrFlg := createLogDir(data.LogRepository)
@@ -58,7 +58,7 @@ func main() {
 			// filepointer creates
 			fp, processErrFlg := createFilePointer(data.LogRepository, branch)
 			if processErrFlg {
-				fmt.Println("NG!!")
+				printResultColor(processErrFlg)
 				continue
 			}
 			defer fp.Close()
@@ -68,13 +68,13 @@ func main() {
 				// master branch checkout
 				processErrFlg = gitCheckOutBranch(data.MasterBranch, fp)
 				if processErrFlg {
-					fmt.Println("NG!!")
+					printResultColor(processErrFlg)
 					continue
 				}
 				// master branch pull
 				processErrFlg = gitPullBranch(data.MainRepository, fp)
 				if processErrFlg {
-					fmt.Println("NG!!")
+					printResultColor(processErrFlg)
 					continue
 				}
 
@@ -85,48 +85,69 @@ func main() {
 			// target branch checkout
 			processErrFlg = gitCheckOutBranch(branch, fp)
 			if processErrFlg {
-				fmt.Println("NG!!")
+				printResultColor(processErrFlg)
 				continue
 			}
 
 			// target branch pull
 			processErrFlg = gitPullBranch(branch, fp)
 			if processErrFlg {
-				fmt.Println("NG!!")
+				printResultColor(processErrFlg)
 				continue
 			}
 
 			// target branch push
 			processErrFlg = gitPushBranch(branch, fp)
 			if processErrFlg {
-				fmt.Println("NG!!")
+				printResultColor(processErrFlg)
 				continue
 			}
 
 			// git pull master branch to target branch
 			gitPullReleaseToTarget(data.MasterBranch, fp)
 			if processErrFlg {
-				fmt.Println("NG!!")
+				printResultColor(processErrFlg)
 				continue
 			}
 
 			// target branch push
 			processErrFlg = gitPushBranch(branch, fp)
 			if processErrFlg {
-				fmt.Println("NG!!")
+				printResultColor(processErrFlg)
 				continue
 			}
 
-			fmt.Println("Ok!!")
+			printResultColor(processErrFlg)
 
 		}
 	}
-	fmt.Println("!!!AutoBranchUpdate complete!!!")
+	return nil
+}
+
+func printResultColor(errFlg bool) {
+	if errFlg {
+		fmt.Print("\x1b[38;2;255;0;0m")
+		fmt.Println("NG!!")
+		fmt.Print("\x1b[0m")
+	} else {
+		fmt.Print("\x1b[38;2;0;126;0m")
+		fmt.Println("OK!!")
+		fmt.Print("\x1b[0m")
+	}
+}
+
+func replaceTildeToHomedir(dirName string) string {
+	usr, _ := user.Current()
+	replacedDirName := strings.Replace(dirName, "~", usr.HomeDir, 1)
+
+	return replacedDirName
 }
 
 func createLogDir(createLogDir string) bool {
 	day := time.Now()
 	today_date := day.Format(DATE_LAYOUT)
+
+	createLogDir = replaceTildeToHomedir(createLogDir)
 
 	os.Chdir(createLogDir)
 	if err := os.Mkdir(today_date, 0777); err != nil {
@@ -137,25 +158,25 @@ func createLogDir(createLogDir string) bool {
 	return false
 }
 
-func getConfigData(configFileName string) SettingArray {
+func getConfigData(configFileName string) (BranchInformationArray, error) {
+	var branchDatas BranchInformationArray
 	raw, err := ioutil.ReadFile(configFileName)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return branchDatas, fmt.Errorf("setting file is not exist")
 	}
 
-	var settingDatas SettingArray
-	if err = json.Unmarshal(raw, &settingDatas); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	if err = json.Unmarshal(raw, &branchDatas); err != nil {
+		return branchDatas, fmt.Errorf("json file unmarhal process err")
 	}
 
-	return settingDatas
+	return branchDatas, nil
 }
 
 func createFilePointer(logDirName string, branchName string) (fp *os.File, errFlg bool) {
 	day := time.Now()
 	today_date := day.Format(DATE_LAYOUT)
+
+	logDirName = replaceTildeToHomedir(logDirName)
 
 	fileName := fmt.Sprintf("%s/%s/%s.log", logDirName, today_date, branchName)
 
@@ -174,6 +195,7 @@ func gitPullBranch(repoName string, fp *os.File) (errFlg bool) {
 	output, err := exec.Command("git", "pull", "--progress", "origin").CombinedOutput()
 	if err != nil {
 		errStr := fmt.Sprintf("%v\n", err)
+		fp.WriteString(string(output))
 		fp.WriteString(errStr)
 		return true
 	}
@@ -189,6 +211,7 @@ func gitPushBranch(repoName string, fp *os.File) (errFlg bool) {
 	output, err := exec.Command("git", "push", "--recurse-submodules=check", "origin", refsRepo).CombinedOutput()
 	if err != nil {
 		errStr := fmt.Sprintf("%v\n", err)
+		fp.WriteString(string(output))
 		fp.WriteString(errStr)
 		return true
 	}
@@ -204,6 +227,7 @@ func gitCheckOutBranch(repoName string, fp *os.File) (errFlg bool) {
 	output, err := exec.Command("git", "checkout", repoName).CombinedOutput()
 	if err != nil {
 		errStr := fmt.Sprintf("%v\n", err)
+		fp.WriteString(string(output))
 		fp.WriteString(errStr)
 		return true
 	}
@@ -219,9 +243,23 @@ func gitPullReleaseToTarget(masterRepoName string, fp *os.File) (errFlg bool) {
 	output, err := exec.Command("git", "pull", "--progress", "origin", refsMasterRepo).CombinedOutput()
 	if err != nil {
 		errStr := fmt.Sprintf("%v\n", err)
+		fp.WriteString(string(output))
 		fp.WriteString(errStr)
 		return true
 	}
 	fp.WriteString(string(output))
 	return false
+}
+
+func main() {
+	// Json file data get
+	configArray, err := getConfigData(CONFIG_FILE)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := autoBranchUpdate(configArray); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("!!!AutoBranchUpdate complete!!!")
 }
