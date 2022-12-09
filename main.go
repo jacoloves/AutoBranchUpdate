@@ -33,19 +33,13 @@ type BranchInformationArray struct {
 	BranchInformationArray []BranchInformation `json:"branchInformationArray"`
 }
 
-func autoBranchUpdate() error {
+func autoBranchUpdate(configArray BranchInformationArray) error {
 	// current direcotry get
 	prev, err := filepath.Abs(".")
 	if err != nil {
 		return err
 	}
 	defer os.Chdir(prev)
-
-	// Json file data get
-	configArray, err := getConfigData(CONFIG_FILE)
-	if err != nil {
-		return err
-	}
 
 	for _, data := range configArray.BranchInformationArray {
 		masterBranchOperationFlg := true
@@ -258,7 +252,13 @@ func gitPullReleaseToTarget(masterRepoName string, fp *os.File) (errFlg bool) {
 }
 
 func main() {
-	if err := autoBranchUpdate(); err != nil {
+	// Json file data get
+	configArray, err := getConfigData(CONFIG_FILE)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := autoBranchUpdate(configArray); err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("!!!AutoBranchUpdate complete!!!")
