@@ -195,6 +195,14 @@ func Test_autoBranchUpdate(t *testing.T) {
 		[]BranchInformation{
 			{
 				Id:             1,
+				MainRepository: "test",
+				LogRepository:  "test",
+				MasterBranch:   "test",
+				RepositoryName: "test",
+				TargetBranches: []string{"test", "test2"},
+			},
+			{
+				Id:             2,
 				MainRepository: "~/released/AutoBranchUpdate",
 				LogRepository:  "~/released/AutoBranchUpdate/test/log",
 				MasterBranch:   "master",
@@ -202,10 +210,6 @@ func Test_autoBranchUpdate(t *testing.T) {
 				TargetBranches: []string{"feature", "feature2"},
 			},
 		},
-	}
-
-	for _, ii := range a.BranchInformationArray {
-		fmt.Println(ii)
 	}
 
 	_ = autoBranchUpdate(a)
