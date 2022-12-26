@@ -207,7 +207,7 @@ func Test_autoBranchUpdate(t *testing.T) {
 				LogRepository:  "~/released/AutoBranchUpdate/test/log",
 				MasterBranch:   "master",
 				RepositoryName: "AutoBranchUpdate",
-				TargetBranches: []string{"feature", "feature2"},
+				TargetBranches: []string{"feature"},
 			},
 		},
 	}
