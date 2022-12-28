@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
-	"time"
 )
 
 const TEST_DATE_LAYOUT = "20060102"
@@ -159,11 +159,7 @@ func Test_createLogDir(t *testing.T) {
 
 	_ = createLogDir("/home/stanaka/released/AutoBranchUpdate/err_test/")
 
-	day := time.Now()
-	today_date := day.Format(TEST_DATE_LAYOUT)
-
-	removeDir := fmt.Sprintf("/home/stanaka/released/AutoBranchUpdate/test/%s", today_date)
-	os.Remove(removeDir)
+	_, _ = exec.Command("~/released/AutoBranchUpdate/remove_testdir.sh").Output()
 }
 
 func Test_createFilePointer(t *testing.T) {
@@ -173,36 +169,15 @@ func Test_createFilePointer(t *testing.T) {
 
 	_, _ = createFilePointer("~/released/AutoBranchUpdate/err_test", "test_ng")
 
-	day := time.Now()
-	today_date := day.Format(TEST_DATE_LAYOUT)
-	removeFile := fmt.Sprintf("/home/stanaka/released/AutoBranchUpdate/test/%s/%s", today_date, "test_ok")
-	os.Remove(removeFile)
-	removeDir := fmt.Sprintf("/home/stanaka/released/AutoBranchUpdate/test/%s", today_date)
-	os.Remove(removeDir)
+	_, _ = exec.Command("~/released/AutoBranchUpdate/remove_testdir.sh").Output()
 }
 
 func Test_autoBranchUpdate(t *testing.T) {
-	_ = TestBranchInformation{
-		Id:             1,
-		MainRepository: "test",
-		LogRepository:  "test",
-		MasterBranch:   "test",
-		RepositoryName: "test",
-		TargetBranches: []string{"test", "test2"},
-	}
 
-	a := BranchInformationArray{
+	trueCase := BranchInformationArray{
 		[]BranchInformation{
 			{
 				Id:             1,
-				MainRepository: "test",
-				LogRepository:  "test",
-				MasterBranch:   "test",
-				RepositoryName: "test",
-				TargetBranches: []string{"test", "test2"},
-			},
-			{
-				Id:             2,
 				MainRepository: "~/released/AutoBranchUpdate",
 				LogRepository:  "~/released/AutoBranchUpdate/test/log",
 				MasterBranch:   "master",
@@ -212,6 +187,6 @@ func Test_autoBranchUpdate(t *testing.T) {
 		},
 	}
 
-	_ = autoBranchUpdate(a)
+	_ = autoBranchUpdate(trueCase)
 
 }
