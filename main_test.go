@@ -159,7 +159,7 @@ func Test_createLogDir(t *testing.T) {
 
 	_ = createLogDir("/home/stanaka/released/AutoBranchUpdate/err_test/")
 
-	_, _ = exec.Command("~/released/AutoBranchUpdate/remove_testdir.sh").Output()
+	testDirDelete()
 }
 
 func Test_createFilePointer(t *testing.T) {
@@ -169,7 +169,7 @@ func Test_createFilePointer(t *testing.T) {
 
 	_, _ = createFilePointer("~/released/AutoBranchUpdate/err_test", "test_ng")
 
-	_, _ = exec.Command("~/released/AutoBranchUpdate/remove_testdir.sh").Output()
+	testDirDelete()
 }
 
 func Test_autoBranchUpdate(t *testing.T) {
@@ -187,6 +187,28 @@ func Test_autoBranchUpdate(t *testing.T) {
 		},
 	}
 
+	errCreateLogDirCase := BranchInformationArray{
+		[]BranchInformation{
+			{
+				Id:             2,
+				MainRepository: "errCreateLogDirCase",
+				LogRepository:  "~/released/AutoBranchUpdate/err_test",
+				MasterBranch:   "errCreateLogDirCase",
+				RepositoryName: "errCreateLogDirCase",
+				TargetBranches: []string{"errCreateLogDirCase"},
+			},
+		},
+	}
+
 	_ = autoBranchUpdate(trueCase)
 
+	testDirDelete()
+	_ = autoBranchUpdate(errCreateLogDirCase)
+
+}
+
+func testDirDelete() {
+	current, _ := filepath.Abs(".")
+	execPath := filepath.Join(current, "remove_testdir.sh")
+	_, _ = exec.Command("sh", execPath).Output()
 }
