@@ -35,10 +35,7 @@ type BranchInformationArray struct {
 
 func autoBranchUpdate(configArray BranchInformationArray) error {
 	// current direcotry get
-	prev, err := filepath.Abs(".")
-	if err != nil {
-		return err
-	}
+	prev, _ := filepath.Abs(".")
 	defer os.Chdir(prev)
 
 	for _, data := range configArray.BranchInformationArray {
