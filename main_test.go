@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"testing"
 )
@@ -159,7 +158,8 @@ func Test_createLogDir(t *testing.T) {
 
 	_ = createLogDir("/home/stanaka/released/AutoBranchUpdate/err_test/")
 
-	testDirDelete()
+	_ = os.RemoveAll("/home/stanaka/released/AutoBranchUpdate/test/20230104")
+	_ = os.RemoveAll("/home/stanaka/released/AutoBranchUpdate/test/log/20230104")
 }
 
 func Test_createFilePointer(t *testing.T) {
@@ -169,7 +169,8 @@ func Test_createFilePointer(t *testing.T) {
 
 	_, _ = createFilePointer("~/released/AutoBranchUpdate/err_test", "test_ng")
 
-	testDirDelete()
+	_ = os.RemoveAll("/home/stanaka/released/AutoBranchUpdate/test/20230104")
+	_ = os.RemoveAll("/home/stanaka/released/AutoBranchUpdate/test/log/20230104")
 }
 
 func Test_autoBranchUpdate(t *testing.T) {
@@ -192,23 +193,49 @@ func Test_autoBranchUpdate(t *testing.T) {
 			{
 				Id:             2,
 				MainRepository: "errCreateLogDirCase",
-				LogRepository:  "~/released/AutoBranchUpdate/err_test",
+				LogRepository:  "",
 				MasterBranch:   "errCreateLogDirCase",
-				RepositoryName: "errCreateLogDirCase",
+				RepositoryName: "",
 				TargetBranches: []string{"errCreateLogDirCase"},
 			},
 		},
 	}
 
-	_ = autoBranchUpdate(trueCase)
+	errGitCheckOutBranchCase := BranchInformationArray{
+		[]BranchInformation{
+			{
+				Id:             3,
+				MainRepository: "~/released/AutoBranchUpdate",
+				LogRepository:  "~/released/AutoBranchUpdate/test/log",
+				MasterBranch:   "release",
+				RepositoryName: "AutoBranchUpdate",
+				TargetBranches: []string{""},
+			},
+		},
+	}
 
-	testDirDelete()
+	errGitPullBranchCase := BranchInformationArray{
+		[]BranchInformation{
+			{
+				Id:             4,
+				MainRepository: "home",
+				LogRepository:  "~/released/AutoBranchUpdate/test/log",
+				MasterBranch:   "master",
+				RepositoryName: "AutoBranchUpdate",
+				TargetBranches: []string{"test"},
+			},
+		},
+	}
+
 	_ = autoBranchUpdate(errCreateLogDirCase)
+	_ = autoBranchUpdate(errGitCheckOutBranchCase)
+	_ = os.RemoveAll("/home/stanaka/released/AutoBranchUpdate/test/20230104")
+	_ = os.RemoveAll("/home/stanaka/released/AutoBranchUpdate/test/log/20230104")
+	_ = autoBranchUpdate(errGitPullBranchCase)
+	_ = os.RemoveAll("/home/stanaka/released/AutoBranchUpdate/test/20230104")
+	_ = os.RemoveAll("/home/stanaka/released/AutoBranchUpdate/test/log/20230104")
+	_ = autoBranchUpdate(trueCase)
+	_ = os.RemoveAll("/home/stanaka/released/AutoBranchUpdate/test/20230104")
+	_ = os.RemoveAll("/home/stanaka/released/AutoBranchUpdate/test/log/20230104")
 
-}
-
-func testDirDelete() {
-	current, _ := filepath.Abs(".")
-	execPath := filepath.Join(current, "remove_testdir.sh")
-	_, _ = exec.Command("sh", execPath).Output()
 }
